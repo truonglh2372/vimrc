@@ -18,11 +18,7 @@ abbr pry! require 'pry'; binding.pry
 abbr cl! console.log( )<left><left>
 abbr rbf before { }<left><left>
 
-let g:ctrlp_by_filename = 1
-let g:ctrlp_switch_buffer = 0
-
-let g:ctrlp_map = ',t'
-nnoremap <silent> ,t :CtrlP<CR>
+nnoremap <silent> ,t :FZF<CR>
 
 map ,ja :CtrlP app/assets<CR>
 map ,jm :CtrlP app/models<CR>
@@ -504,14 +500,12 @@ call plug#begin()
   Plug 'vim-scripts/AutoTag'
   Plug 'vim-scripts/lastpos.vim'
   Plug 'vim-scripts/sudo.vim'
-  Plug 'goldfeld/ctrlr.vim'
   Plug 'editorconfig/editorconfig-vim'
   Plug 'chrisbra/color_highlight'
   Plug 'skwp/vim-colors-solarized'
   Plug 'itchyny/lightline.vim'
   Plug 'jby/tmux.vim'
   Plug 'morhetz/gruvbox'
-  Plug 'xsunsmile/showmarks'
   Plug 'chriskempson/base16-vim'
   Plug 'godlygeek/csapprox'
   Plug 'gregsexton/gitv'
@@ -532,8 +526,6 @@ call plug#begin()
   Plug 'mogelbrod/vim-jsonpath'
   Plug 'jistr/vim-nerdtree-tabs'
   Plug 'preservim/nerdtree'
-  Plug 'ctrlpvim/ctrlp.vim'
-  Plug 'JazzCore/ctrlp-cmatcher'
   Plug 'junegunn/fzf'
   Plug 'xolox/vim-misc'
   Plug 'xolox/vim-session'
@@ -555,3 +547,4 @@ call plug#begin()
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
+autocmd CursorHold * silent! checktime
