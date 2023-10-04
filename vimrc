@@ -453,10 +453,16 @@ endif
 colorscheme solarized
 set background=dark
 
+"vimspec
+map rcs :call RunCurrentSpecFile()<CR>
+map rcl :call RunNearestSpec()<CR>
+map rls :call RunLastSpec()<CR>
+map ras :call RunAllSpecs()<CR>
 
 "pluggin
 
 call plug#begin()
+  Plug 'thoughtbot/vim-rspec'
   Plug 'junegunn/vim-easy-align'
   Plug 'ecomba/vim-ruby-refactoring'
   Plug 'tpope/vim-rails'
