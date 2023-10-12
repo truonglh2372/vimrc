@@ -3,7 +3,12 @@ set nocompatible
 set clipboard=unnamed
 set autoindent expandtab tabstop=2 shiftwidth=2
 set encoding=utf-8 nobomb
-set hlsearch
+set is hls
+set scrolloff=5
+set belloff=all
+filetype indent on
+set smartindent
+autocmd BufRead,BufWritePre *.sh normal gg=G
 
 " Auto open nerd tree on startup
 let g:nerdtree_tabs_open_on_gui_startup = 0
@@ -146,6 +151,83 @@ nmap <silent> gcp <c-_>p
 
 "tidy
 :vmap ,gt :!tidy -q -i --show-errors 0<CR>
+
+onoremap an :<c-u>call <SID>NextTextObject('a', '/')<cr>
+xnoremap an :<c-u>call <SID>NextTextObject('a', '/')<cr>
+onoremap in :<c-u>call <SID>NextTextObject('i', '/')<cr>
+xnoremap in :<c-u>call <SID>NextTextObject('i', '/')<cr>
+
+onoremap al :<c-u>call <SID>NextTextObject('a', '?')<cr>
+xnoremap al :<c-u>call <SID>NextTextObject('a', '?')<cr>
+onoremap il :<c-u>call <SID>NextTextObject('i', '?')<cr>
+xnoremap il :<c-u>call <SID>NextTextObject('i', '?')<cr>
+
+function! s:NextTextObject(motion, dir)
+  let c = nr2char(getchar())
+  let d = ''
+
+  if c ==# "b" || c ==# "(" || c ==# ")"
+    let c = "("
+  elseif c ==# "B" || c ==# "{" || c ==# "}"
+    let c = "{"
+  elseif c ==# "r" || c ==# "[" || c ==# "]"
+    let c = "["
+  elseif c ==# "'"
+    let c = "'"
+  elseif c ==# '"'
+    let c = '"'
+  else
+    return
+  endif
+  execute "normal! " . a:dir . c . "\<cr>"
+  if a:motion ==# 'a'
+    execute "normal! va" . c
+  else
+    let open = ''
+    let close = ''
+
+    if c ==# "(" 
+      let open = "("
+      let close = ")"
+    elseif c ==# "{"
+      let open = "{"
+      let close = "}"
+    elseif c ==# "["
+      let open = "\\["
+      let close = "\\]"
+    elseif c ==# "'"
+      let open = "'"
+      let close = "'"
+    elseif c ==# '"'
+      let open = '"'
+      let close = '"'
+    endif
+    let start_pos = getpos('.')
+    let start_l = start_pos[1]
+    let start_c = start_pos[2]
+    if c ==# "'" || c ==# '"'
+      let end_pos = searchpos(open)
+    else
+      let end_pos = searchpairpos(open, '', close)
+    endif
+    let end_l = end_pos[0]
+    let end_c = end_pos[1]
+    call setpos('.', start_pos)
+    if start_l == end_l && start_c == (end_c - 1)
+      execute "normal! ax\<esc>\<left>"
+      execute "normal! vi" . c
+    elseif start_l == end_l && start_c == (end_c - 2)
+      execute "normal! vi" . c
+    else
+      let whichwrap = &whichwrap
+      set whichwrap+=h,l
+
+      execute "normal! va" . c . "hol"
+
+      let &whichwrap = whichwrap
+    endif
+  endif
+endfunction
 
 "tmux navigator
 let g:tmux_navigator_no_mappings = 1
@@ -524,9 +606,9 @@ call plug#begin()
   Plug 'garbas/vim-snipmate'
   Plug 'honza/vim-snippets'
   Plug 'jtratner/vim-flavored-markdown'
-  Plug 'vim-syntastic/syntastic'
   Plug 'nelstrom/vim-markdown-preview'
   Plug 'skwp/vim-html-escape'
+  Plug 'yuezk/vim-js'
   Plug 'MaxMEllon/vim-jsx-pretty'
   Plug 'jparise/vim-graphql'
   Plug 'mogelbrod/vim-jsonpath'
@@ -550,7 +632,29 @@ call plug#begin()
   Plug 'Shougo/deoplete.nvim'
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
+  Plug 'vim-autoformat/vim-autoformat'
+  Plug 'ngmy/vim-rubocop'
 call plug#end()
 
+" deoplete
 let g:deoplete#enable_at_startup = 1
-autocmd CursorHold * silent! checktime
+inoremap <silent><expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+inoremap <silent><expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+
+
+" eslint
+function! PrettyFile()
+  if &filetype=="javascript"
+    if exists('g:loaded_Beautifier')
+      call JsBeautify()
+    endif
+    if exists('g:loaded_ESLintFix')
+      call ESLintFix()
+    endif
+  end
+endfunction
+
+autocmd BufWritePre * execute 'call PrettyFile()'
+
+"autoformat
+" let g:autoformat_verbosemode=1
